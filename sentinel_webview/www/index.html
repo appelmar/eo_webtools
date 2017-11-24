@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Sentinel Webview</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+          integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+          crossorigin=""/>
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+            integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+            crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+</head>
+<body>
+
+
+<nav class="navbar navbar-expand-lg sticky-top navbar-dark bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ui_navbar_vissettings" aria-controls="ui_navbar_vissettings" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="#">Sentinel Webview</a>
+
+    <div class="collapse navbar-collapse" id="ui_navbar_vissettings">
+        <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="ui_navbar_search" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-search  fa-lg" aria-hidden="true" aria-label="Search"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="ui_navbar_search">
+                    <form class="px-2 py-2">
+                        <div class="form-group">
+                            <label for="ui_search_startdate">Start date</label>
+                            <input type="date" class="form-control" id="ui_search_startdate" placeholder="start date">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ui_search_startdate">End date</label>
+                            <input type="date" class="form-control" id="ui_search_enddate" placeholder="end date">
+                        </div>
+                        <div class="mx-auto" style="width: 100%;">
+                            <button type="button" class="btn btn-secondary">Search</button>
+                        </div>
+                    </form>
+                    <form class="px-2 py-2">
+                        <div class="dropdown-divider"></div>
+                        <small>
+                            <div class="btn-group-vertical" data-toggle="buttons" id="ui_search_result_list"></div>
+                        </small>
+                    </form>
+                </div>
+            </li>
+        </ul>
+        <span class="navbar-text mr-auto mt-2 mt-lg-0" id="ui_label_curscene">
+            Current image: none
+        </span>
+
+
+
+        <ul class="navbar-nav">
+            <li class="nav-item dropdown keep-open" id="dropdown_vis_menu">
+                <a class="nav-link dropdown-toggle"  id="ui_navbar_searchVIS" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-cog  fa-lg" aria-hidden="true" aria-label="Settings"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" style="min-width:350px;" aria-labelledby="ui_navbar_searchVIS">
+                    <small>
+                        <form class="px-2 py-2" id="ui_vis_form">
+
+                            <ul class="nav nav-tabs nav-fill"  id="ui_tab_vis" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link bg-dark" id="ui_tab_gray_nav" data-toggle="tab" href="#ui_tab_grayscale" onclick="vis_pars.nchannels = 1;" role="tab" aria-controls="ui_tab_grayscale" aria-selected="false">1-band (grayscale)</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link active bg-dark" id="ui_tab_rgb_nav" data-toggle="tab" href="#ui_tab_rgbscale" onclick="vis_pars.nchannels = 3;" role="tab" aria-controls="ui_tab_rgbscale" aria-selected="true">3-band (RGB)</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link bg-dark" id="ui_tab_preset_nav" data-toggle="tab" href="#ui_tab_preset"  role="tab" aria-controls="ui_tab_preset" aria-selected="false">Presets</a>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <div class="tab-pane py-2" id="ui_tab_grayscale" role="tabpanel" aria-labelledby="ui_tab_gray_nav">
+                                    <div>Band selection</div>
+                                    <div class="form-row">
+                                        <div class="col">
+                                            <select id="ui_selband_gray" class="form-control-sm" >
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                                <option value="7">7</option>
+                                                <option value="8">8</option>
+                                                <option value="9">8a</option>
+                                                <option value="10">9</option>
+                                                <option value="11">10</option>
+                                                <option value="12">11</option>
+                                                <option value="13">12</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="dropdown-divider"></div>
+
+
+                                    <div>Band color range</div>
+                                    <div class="form-group">
+                                        <label for="ui_vis_grayscale_b_text">Values:</label>
+                                        <span id="ui_vis_grayscale_b_text"></span>
+                                        <div id="ui_vis_grayscale_b"></div>
+                                    </div>
+
+
+
+
+
+                                </div>
+                                <div class="tab-pane active py-2" id="ui_tab_rgbscale" role="tabpanel" aria-labelledby="ui_tab_rgb_nav">
+                                    <div>Band selection</div>
+                                    <div class="form-row">
+                                        <div class="col">
+                                            <label for="ui_selband_rgb_1">R</label>
+                                            <select id="ui_selband_rgb_1" class="form-control-sm" >
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                                <option value="7">7</option>
+                                                <option value="8">8</option>
+                                                <option value="9">8a</option>
+                                                <option value="10">9</option>
+                                                <option value="11">10</option>
+                                                <option value="12">11</option>
+                                                <option value="13">12</option>
+                                            </select>
+                                        </div>
+                                        <div class="col">
+                                            <label for="ui_selband_rgb_2">G</label>
+                                            <select id="ui_selband_rgb_2" class="form-control-sm">
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                                <option value="7">7</option>
+                                                <option value="8">8</option>
+                                                <option value="9">8a</option>
+                                                <option value="10">9</option>
+                                                <option value="11">10</option>
+                                                <option value="12">11</option>
+                                                <option value="13">12</option>
+                                            </select>
+                                        </div>
+                                        <div class="col">
+                                            <label for="ui_selband_rgb_3">B</label>
+                                            <select id="ui_selband_rgb_3" class="form-control-sm">
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                                <option value="7">7</option>
+                                                <option value="8">8</option>
+                                                <option value="9">8a</option>
+                                                <option value="10">9</option>
+                                                <option value="11">10</option>
+                                                <option value="12">11</option>
+                                                <option value="13">12</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="dropdown-divider"></div>
+
+
+                                    <div  class="form-group">Band color range
+                                        <a id="ui_vis_linkbands" href="javascript:ui_toggle_color_lock()">
+                                            <i class="fa fa-lg fa-link" aria-hidden="true"></i>
+                                        </a></div>
+
+                                    <div class="form-group">
+                                        <label for="ui_vis_rgbscale_b1_text">R:</label>
+                                        <span id="ui_vis_rgbscale_b1_text" class="text-muted"></span>
+                                        <div id="ui_vis_rgbscale_b1" class="form-control"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ui_vis_rgbscale_b2_text">G:</label>
+                                        <span id="ui_vis_rgbscale_b2_text"  class="text-muted"></span>
+                                        <div id="ui_vis_rgbscale_b2" class="form-control"></div>
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ui_vis_rgbscale_b3_text">B:</label>
+                                        <span id="ui_vis_rgbscale_b3_text"  class="text-muted"></span>
+                                        <div id="ui_vis_rgbscale_b3" class="form-control"></div>
+                                    </div>
+                                </div>
+
+
+                                <div class="tab-pane py-2" id="ui_tab_preset" role="tabpanel" aria-labelledby="ui_tab_preset_nav">
+
+                                    <p>After selecting a preset, you can modify its parameters in the other tabs.</p>
+
+
+                                    <div class="btn-group-vertical"  id="ui_preset_list">
+
+                                        <button type="button" class="btn btn-secondary btn-sm"  onclick="ui_vis_load_preset(1)">True Color RGB</button>
+                                        <button type="button" class="btn btn-secondary btn-sm"  onclick="ui_vis_load_preset(2)">False Color NIR</button>
+                                        <button type="button" class="btn btn-secondary btn-sm"  onclick="ui_vis_load_preset(3)">Water Bodies</button>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+
+
+
+
+
+
+
+                            <div class="dropdown-divider"></div>
+                            <label for="ui_vis_opacity">Opacity: </label>
+                            <span id="ui_vis_opacity_text"></span>
+                            <div id="ui_vis_opacity"></div>
+
+                            <!--<input id="ui_vis_opacity" type="range"  min="0" max="1" step="0.05" value="1" />-->
+                            <div class="dropdown-divider"></div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <button type="button" class="btn btn-primary btn-sm form-control" onclick="ui_close_vis_dropdown();">Close</button>
+                                </div>
+                                <div class="col">
+                                    <button type="button" class="btn btn-primary btn-sm form-control" onclick="update_vis()">Apply</button>
+                                </div>
+                            </div>
+
+
+                        </form>
+                    </small>
+
+                </div>
+            </li>
+        </ul>
+
+
+
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="#" role="button" data-toggle="modal" data-target="#ui_modal_help">
+                    <i class="fa fa-info-circle fa-lg" aria-hidden="true" aria-label="Help"></i>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="ui_modal_help" tabindex="-1" role="dialog" aria-labelledby="ui_modal_help" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Help</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Sentinel Webview is built using the following third-party libraries:
+                <ul>
+                    <li>jquery</li>
+                    <li>jqueryUI</li>
+                    <li>Bootstrap</li>
+                    <li>FontAwesome</li>
+                </ul>
+
+                <div>
+                    <h5>License</h5>
+                    <small>
+                        <p>Copyright 2017 Marius Appel</p>
+
+                    <p>Licensed under the Apache License, Version 2.0 (the "License");
+                    you may not use this file except in compliance with the License.
+                        You may obtain a copy of the License at</p>
+
+                    <p>http://www.apache.org/licenses/LICENSE-2.0</p>
+
+                        <p>Unless required by applicable law or agreed to in writing, software
+                    distributed under the License is distributed on an "AS IS" BASIS,
+                    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                    See the License for the specific language governing permissions and
+                            limitations under the License.</p>
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <small>
+
+
+                <span class="text-muted">Sentinel Webview is <i class="fa fa-copyright" aria-hidden="true"></i> 2017
+                    Marius Appel., marius.appel@uni-muenster.de </span>
+                    <span>
+                        <a href="https://github.com/appelmar/eo_webtools">
+                            <i class="fa fa-github  fa-lg"  aria-hidden="true" aria-label="Settings"></i>
+                        </a>
+                        <a href="https://github.com/appelmar/eo_webtools">
+                            <i class="fa fa-github  fa-lg"  aria-hidden="true" aria-label="Settings"></i>
+                        </a>
+                    </span>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<div class="container-fluid mapbox">
+    <div class="row fill-vertical">
+        <div class="col-sm p-0 m-0" >
+            <div id="map" class="fill-vertical"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<script>
+
+
+    var vis_pars = {
+        "scene" : "out",
+        "opacitiy" : 1.0,
+        "nchannels" : 1,
+        "bands_linked" : false,
+        "bands" : ["4","3","2"],
+        "color_range" :
+                [{"min" : 0, "max" : 16000},
+                    {"min" : 0, "max" : 16000},
+                    {"min" : 0, "max" : 16000}]
+
+    }
+
+
+
+
+
+
+
+    var map = L.map('map').setView([51.505, -0.09], 5);
+    var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    });
+    osm.addTo(map);
+    var eolayer = L.tileLayer('http://localhost:8080/tms/asdasdsdddddd/{z}/{x}/{y}', {
+        transparency: 'true',
+        opacity: 1
+    });
+    eolayer.addTo(map);
+
+    var baseMaps = {
+        "OSM" : osm
+    };
+    var overlayMaps = {
+        "Sentinel 2" : eolayer
+    };
+
+
+    $("ui_search_result_list").empty();
+    $.getJSON("/search", function(result){
+        $.each(result, function(i, field){
+            $('#ui_search_result_list').append(
+                    '<label class="btn btn-secondary btn-outline-dark btn-sm"><input type="radio" name="options" id="option1" autocomplete="off" onchange="ui_select_scene(\'' + field.id + '\' )">' + field.id + '</label>');
+        });});
+
+
+
+
+
+    $( function() {
+
+
+
+        $('.dropdown.keep-open').on({
+            "shown.bs.dropdown": function() { this.closable = false; },
+            "hide.bs.dropdown":  function() { return this.closable; }
+        });
+
+        $( "#ui_vis_grayscale_b" ).slider({
+            range: true,
+            min: 0,
+            max: 5.0,
+            step: 0.05,
+            values: [ 0, 5 ],
+            slide: function( event, ui ) {
+                var v0 = ui.values[ 0 ];
+                var v1 = ui.values[ 1 ];
+                var min = color_scale(v0);
+                var max =  color_scale(v1);
+                $( "#ui_vis_grayscale_b_text" ).text(min + " - " + max );
+            }
+        });
+
+
+        $( "#ui_vis_rgbscale_b1" ).slider({
+            range: true,
+            min: 0,
+            max: 5.0,
+            step: 0.05,
+            values: [ 0, 5 ],
+            slide: function( event, ui ) {
+                var v0 = ui.values[ 0 ];
+                var v1 = ui.values[ 1 ];
+                var min =  color_scale(v0);
+                var max =  color_scale(v1);
+                $( "#ui_vis_rgbscale_b1_text" ).text( min + " - " + max );
+                if (vis_pars.bands_linked) {
+                    $( "#ui_vis_rgbscale_b3" ).slider("values", 0, v0);
+                    $( "#ui_vis_rgbscale_b3" ).slider("values", 1, v1);
+                    $( "#ui_vis_rgbscale_b2" ).slider("values", 0, v0);
+                    $( "#ui_vis_rgbscale_b2" ).slider("values", 1, v1);
+                    $( "#ui_vis_rgbscale_b2_text" ).text( min + " - " + max );
+                    $( "#ui_vis_rgbscale_b3_text" ).text( min + " - " + max );
+                }
+            }
+        });
+
+
+        $( "#ui_vis_rgbscale_b2" ).slider({
+            range: true,
+            min: 0,
+            max: 5.0,
+            step: 0.05,
+            values: [ 0, 5 ],
+            slide: function( event, ui ) {
+                var v0 = ui.values[ 0 ];
+                var v1 = ui.values[ 1 ];
+                var min =  color_scale(v0);
+                var max =  color_scale(v1);
+                $( "#ui_vis_rgbscale_b2_text" ).text( min + " - " +max);
+                if (vis_pars.bands_linked) {
+                    $( "#ui_vis_rgbscale_b1" ).slider("values", 0, v0);
+                    $( "#ui_vis_rgbscale_b1" ).slider("values", 1, v1);
+                    $( "#ui_vis_rgbscale_b3" ).slider("values", 0, v0);
+                    $( "#ui_vis_rgbscale_b3" ).slider("values", 1, v1);
+                    $( "#ui_vis_rgbscale_b1_text" ).text( min + " - " + max );
+                    $( "#ui_vis_rgbscale_b3_text" ).text( min + " - " + max );
+                }
+            }
+        });
+
+
+        $( "#ui_vis_rgbscale_b3" ).slider({
+            range: true,
+            min: 0,
+            max: 5.0,
+            step: 0.05,
+            values: [ 0, 5 ],
+            slide: function( event, ui ) {
+                var v0 = ui.values[ 0 ];
+                var v1 = ui.values[ 1 ];
+                var min = color_scale(v0);
+                var max =  color_scale(v1);
+                $( "#ui_vis_rgbscale_b3_text" ).text(min + " - " + max );
+                if (vis_pars.bands_linked) {
+                    $( "#ui_vis_rgbscale_b1" ).slider("values", 0, v0);
+                    $( "#ui_vis_rgbscale_b1" ).slider("values", 1, v1);
+                    $( "#ui_vis_rgbscale_b2" ).slider("values", 0, v0);
+                    $( "#ui_vis_rgbscale_b2" ).slider("values", 1, v1);
+                    $( "#ui_vis_rgbscale_b1_text" ).text( min + " - " + max );
+                    $( "#ui_vis_rgbscale_b2_text" ).text( min + " - " + max );
+                }
+            }
+        });
+
+        $( "#ui_vis_grayscale_b_text" ).text( color_scale($( "#ui_vis_grayscale_b" ).slider( "values", 0 )) +
+                " - " + color_scale($( "#ui_vis_grayscale_b" ).slider( "values", 1 )) );
+        $( "#ui_vis_rgbscale_b1_text" ).text( color_scale($( "#ui_vis_rgbscale_b1" ).slider( "values", 0 )) +
+                " - " + color_scale($( "#ui_vis_rgbscale_b1" ).slider( "values", 1 )) );
+        $( "#ui_vis_rgbscale_b2_text" ).text( color_scale($( "#ui_vis_rgbscale_b2" ).slider( "values", 0 )) +
+                " - " + color_scale($( "#ui_vis_rgbscale_b2" ).slider( "values", 1 )) );
+        $( "#ui_vis_rgbscale_b3_text" ).text( color_scale($( "#ui_vis_rgbscale_b3" ).slider( "values", 0 )) +
+                " - " + color_scale($( "#ui_vis_rgbscale_b3" ).slider( "values", 1 )) );
+
+
+        $( "#ui_vis_opacity" ).slider({
+            min: 0,
+            max: 1,
+            value: 1 ,
+            step: 0.05,
+            slide: function( event, ui ) {
+                $( "#ui_vis_opacity_text" ).text( ui.value );
+            }
+        });
+        $( "#ui_vis_opacity_text" ).text( $( "#ui_vis_opacity" ).slider( "value" ) );
+
+
+
+
+
+    } );
+
+
+
+    function ui_close_vis_dropdown() {
+        $('#dropdown_vis_menu')[0].closable = true;
+        $('#ui_navbar_searchVIS').dropdown('toggle');
+    }
+
+
+    function color_scale(v) {
+        return( Math.round(16384 * (-1 + Math.pow(2,v)) / (-1 + Math.pow(2,5))));
+    }
+
+
+    function ui_select_scene(scene_id) {
+        vis_pars.scene = scene_id;
+        $("#ui_label_curscene").text(scene_id);
+        update_vis();
+    }
+
+
+    function update_vis() {
+
+
+        // vis_pars.nchannels will be set when corresponding UI tab is shown
+        if (vis_pars.nchannels == 1) {
+            vis_pars.bands =  [$( "#ui_selband_gray").val()];
+            vis_pars.color_range =
+                    [
+                        {"min" : color_scale($( "#ui_vis_grayscale_b" ).slider( "values", 0 )), "max" : color_scale($( "#ui_vis_grayscale_b" ).slider( "values", 1 ))}
+                    ];
+            eolayer.setUrl('http://localhost:8080/tms/' + vis_pars.scene + '/{z}/{x}/{y}?bands=' + vis_pars.bands[0]  + '&min=' + vis_pars.color_range[0].min + '&max=' + vis_pars.color_range[0].max);
+        }
+        else {
+
+            vis_pars.bands =  [$( "#ui_selband_rgb_1").val(), $( "#ui_selband_rgb_2").val(), $( "#ui_selband_rgb_3").val()];
+            vis_pars.color_range =
+                    [
+                        {"min" : color_scale($( "#ui_vis_rgbscale_b1" ).slider( "values", 0 )), "max" : color_scale($( "#ui_vis_rgbscale_b1" ).slider( "values", 1 ))},
+                        {"min" : color_scale($( "#ui_vis_rgbscale_b2" ).slider( "values", 0 )), "max" : color_scale($( "#ui_vis_rgbscale_b2" ).slider( "values", 1 ))},
+                        {"min" : color_scale($( "#ui_vis_rgbscale_b3" ).slider( "values", 0 )), "max" : color_scale($( "#ui_vis_rgbscale_b2" ).slider( "values", 1 ))}
+                    ];
+            var minstr = "" + vis_pars.color_range[0].min + ","  + vis_pars.color_range[1].min + "," + vis_pars.color_range[2].min;
+            var maxstr = "" + vis_pars.color_range[0].max + ","  + vis_pars.color_range[1].max + "," + vis_pars.color_range[2].max;
+            eolayer.setUrl('http://localhost:8080/tms/' + vis_pars.scene + '/{z}/{x}/{y}?bands=' + vis_pars.bands[0]   + ',' +   vis_pars.bands[1]  + ',' +  vis_pars.bands[2]  + '&min=' + minstr + '&max=' + maxstr);
+
+        }
+        vis_pars.opacitiy = $( "#ui_vis_opacity").slider( "value" );
+        eolayer.setOpacity(vis_pars.opacitiy);
+    }
+
+    function ui_toggle_color_lock() {
+        console.log($( "#ui_vis_linkbands" ).hasClass("active"));
+        if ($( "#ui_vis_linkbands" ).hasClass("active")) {
+            $( "#ui_vis_linkbands" ).html(" <i class=\"fa fa-lg fa-unlink\" aria-hidden=\"true\"></i>");
+            $( "#ui_vis_linkbands" ).removeClass("active");
+            vis_pars.bands_linked = false;
+        }
+        else {
+            $( "#ui_vis_linkbands" ).html(" <i class=\"fa fa-lg fa-link\" aria-hidden=\"true\"></i>");
+            $( "#ui_vis_linkbands" ).addClass("active");
+            vis_pars.bands_linked = true;
+        }
+
+
+
+    }
+
+
+
+    function ui_vis_load_preset(p) {
+        switch(parseInt(p)) {
+            case 1: {
+                $("#ui_vis_opacity").slider("value",1);
+                $("#ui_vis_rgbscale_b1").slider("values",0,0.1);
+                $("#ui_vis_rgbscale_b2").slider("values",0,0.1);
+                $("#ui_vis_rgbscale_b3").slider("values",0,0.1);
+                $("#ui_vis_rgbscale_b1").slider("values",1,2.3);
+                $("#ui_vis_rgbscale_b2").slider("values",1,2.3);
+                $("#ui_vis_rgbscale_b3").slider("values",1,2.3);
+                $("#ui_selband_rgb_1").val(4);
+                $("#ui_selband_rgb_2").val(3);
+                $("#ui_selband_rgb_3").val(2);
+                $('#ui_tab_vis a[href="#ui_tab_rgbscale"]').tab('show');
+                vis_pars.nchannels = 3;
+                break;
+            }
+            case 2 : {
+                $("#ui_vis_opacity").slider("value",1);
+                $("#ui_vis_rgbscale_b1").slider("values",0,0);
+                $("#ui_vis_rgbscale_b2").slider("values",0,0);
+                $("#ui_vis_rgbscale_b3").slider("values",0,0);
+                $("#ui_vis_rgbscale_b1").slider("values",1,3.5);
+                $("#ui_vis_rgbscale_b2").slider("values",1,2.5);
+                $("#ui_vis_rgbscale_b3").slider("values",1,2.5);
+                $("#ui_selband_rgb_1").val(8);
+                $("#ui_selband_rgb_2").val(3);
+                $("#ui_selband_rgb_3").val(2);
+                $('#ui_tab_vis a[href="#ui_tab_rgbscale"]').tab('show');
+                vis_pars.nchannels = 3;
+                break;
+            }
+            case 3 : {
+                $("#ui_vis_opacity").slider("value",1);
+                $("#ui_vis_grayscale_b").slider("values",0,0);
+                $("#ui_vis_grayscale_b").slider("values",1,1.4);
+
+                $("#ui_selband_gray").val(8);
+                $('#ui_tab_vis a[href="#ui_tab_grayscale"]').tab('show');
+                vis_pars.nchannels = 1;
+                break;
+            }
+
+        }
+
+
+        $( "#ui_vis_rgbscale_b1_text" ).text( color_scale($( "#ui_vis_rgbscale_b1" ).slider( "values", 0 )) +
+                " - " + color_scale($( "#ui_vis_rgbscale_b1" ).slider( "values", 1 )) );
+        $( "#ui_vis_rgbscale_b2_text" ).text( color_scale($( "#ui_vis_rgbscale_b2" ).slider( "values", 0 )) +
+                " - " + color_scale($( "#ui_vis_rgbscale_b2" ).slider( "values", 1 )) );
+        $( "#ui_vis_rgbscale_b3_text" ).text( color_scale($( "#ui_vis_rgbscale_b3" ).slider( "values", 0 )) +
+                " - " + color_scale($( "#ui_vis_rgbscale_b3" ).slider( "values", 1 )) );
+
+
+    }
+
+</script>
+</body>
+</html>
