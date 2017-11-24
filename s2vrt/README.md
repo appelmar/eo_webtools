@@ -6,9 +6,13 @@ This commmand line tool generates GDAL VRT datasets for Sentinel 2 (L1C) imagery
 For fast interactive mapping, tiled GeoTIFF files with overview levels 2, 4, 8, 16, 32 should be prefered even though they might consume more disk space.
 
 
-## Usage
+
+### Usage
+
+`s2vrt OPTION SOURCEFILE TARGETDIR`
+
+**Options**:
 ```
-Input arguments:
   -h [ --help ]         print usage
   -o [ --overview ] arg overview levels which will be generated for input 
                         images
@@ -19,7 +23,7 @@ Input arguments:
   --output-file arg
 ```
 
-# Examples
+### Examples
 
 **Build a simple VRT dataset to index all Sentinel 2 bands in one image**
 ```
@@ -29,8 +33,8 @@ s2vrt  S2A_MSIL1C_20170815T102021_N0205_R065_T32TMR_20170815T102513.SAFE/MTD_MSI
 
 **Convert a S2 scene to cloud-optimized GeoTIFF files including overviews**  
 ```
-s2vrt -v -o "2 4 8 16 32" --cog S2A_MSIL1C_20170815T102021_N0205_R065_T32TMR_20170815T102513.SAFE/MTD_MSIL1C.xml S2A_MSIL1C_20170815T102021_N0205_R065_T32TMR_20170815T102513.vrt
+s2vrt -o "2 4 8 16 32" --cog S2A_MSIL1C_20170815T102021_N0205_R065_T32TMR_20170815T102513.SAFE/MTD_MSIL1C.xml S2A_MSIL1C_20170815T102021_N0205_R065_T32TMR_20170815T102513.vrt
 ```
 
-# Build instructions
+### Build instructions
 (see Dockerfile)
