@@ -33,16 +33,41 @@ import (
 
 const EO_WEBTILE_PATH = "eo_webtile"
 const TILE_DIR= "/tmp/tiles"  // directory, where PNG tiles will be stored
-const SCENE_DIR= "data/" // directory, where S2 VRTs are stored
 const CATALOG_FILE = "www/catalog.json"
 
 
 
 type Scene struct {
-	id    string
-	path     string
-	date	string
-	footprint string
+	Id    string `json:"id"`
+	Path     string `json:"path"`
+	Date	string `json:"date"`
+	Footprint string `json:"footprint"`
+}
+
+
+type SceneList struct {
+	Collection [] Scene
+}
+
+
+var scenePath map[string]string
+var slist []Scene
+
+
+func updateCatalog() {
+	dat, err := ioutil.ReadFile(CATALOG_FILE)
+	if err != nil {
+		log.Fatal(err)
+	}
+	slist = make([]Scene, 0)
+	err = json.Unmarshal(dat, &slist)
+	if err != nil {
+		log.Fatal(err)
+	}
+	scenePath = make(map[string]string)
+	for i := 0; i < len(slist); i++ {
+		scenePath[slist[i].Id] = slist[i].Path
+	}
 }
 
 
@@ -54,9 +79,10 @@ func main() {
 	r.PathPrefix("/www/").Handler(http.StripPrefix("/www/", http.FileServer(http.Dir("www"))))
 	r.HandleFunc("/tms/{scene_id}/{z}/{x}/{y}", serve_tile)
 	r.HandleFunc("/search", search_data)
+	updateCatalog()
 	srv := &http.Server{
 		Handler:      r,
-		Addr:         "localhost:8080",
+		Addr:         ":8080",
 		WriteTimeout: 10 * time.Second,
 		ReadTimeout:  10 * time.Second,
 	}
@@ -116,7 +142,7 @@ func serve_tile(w http.ResponseWriter, r *http.Request) {
 	}
 
 
-	args = append(args, SCENE_DIR + "/" + path_vars["scene_id"] + ".vrt")
+	args = append(args, scenePath[path_vars["scene_id"]])
 	args = append(args,  TILE_DIR)
 
 	// TODO: check input query parameters and path variables for validity
@@ -133,19 +159,15 @@ func serve_tile(w http.ResponseWriter, r *http.Request) {
 
 func search_data(w http.ResponseWriter, r *http.Request) {
 
-	dat, err := ioutil.ReadFile(CATALOG_FILE)
-	if err != nil {
-		log.Fatal(err)
-	}
+	updateCatalog()
 
-	slist := make([]Scene,0)
-	err = json.Unmarshal(dat, &slist)
+	out, err :=json.Marshal(slist)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(dat)
+	w.Write(out)
 }
 
 
