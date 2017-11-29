@@ -28,6 +28,7 @@ struct arg_input {
     std::string input_file;
     bool cog;
     bool verbose;
+    std::string out_cog_dir;
     std::vector<uint16_t> overview_levels;
 } args;
 
@@ -158,17 +159,15 @@ int create_vrt() {
                 return 1;
             }
 
-            // TODO: where to store COGs?
-
             GDALDatasetH tmp;
-            boost::filesystem::path dir = boost::filesystem::path{args.input_file}.parent_path();
-            tmp = GDALTranslate((dir / ( "10m" + it->first + ".tif")).string().c_str(), (GDALDatasetH) in_sd_10m, trans_options, NULL);
+            boost::filesystem::path dir = args.out_cog_dir;
+            tmp = GDALTranslate((dir / (boost::filesystem::basename(boost::filesystem::path(args.input_file).parent_path()) +  ( "_10m_" + it->first + ".tif"))).string().c_str(), (GDALDatasetH) in_sd_10m, trans_options, NULL);
             GDALClose(in_sd_10m);
             in_sd_10m = (GDALDataset*)tmp;
-            tmp = GDALTranslate((dir / ( "20m" + it->first + ".tif")).string().c_str(), (GDALDatasetH) in_sd_20m, trans_options, NULL);
+            tmp = GDALTranslate((dir / (boost::filesystem::basename(boost::filesystem::path(args.input_file).parent_path()) +  ( "_20m_" + it->first + ".tif"))).string().c_str(), (GDALDatasetH) in_sd_20m, trans_options, NULL);
             GDALClose(in_sd_20m);
             in_sd_20m = (GDALDataset*)tmp;
-            tmp = GDALTranslate((dir / ( "60m" + it->first + ".tif")).string().c_str(), (GDALDatasetH) in_sd_60m, trans_options, NULL);
+            tmp = GDALTranslate((dir / (boost::filesystem::basename(boost::filesystem::path(args.input_file).parent_path()) +  ( "_60m_" + it->first + ".tif"))).string().c_str(), (GDALDatasetH) in_sd_60m, trans_options, NULL);
             GDALClose(in_sd_60m);
             in_sd_60m = (GDALDataset*)tmp;
 
@@ -257,7 +256,7 @@ int create_vrt() {
             if (args.verbose) {
                 std::cout << "... building overviews (" << is + 1 << "/" << scene_sds.size() << ")" << std::endl;
             }
-            // TODO generate overviews for in_sd_10m, in_sd_20m, and in_sd_60m
+
             std::vector<int> levels;
             for (uint16_t io=0; io<args.overview_levels.size(); ++io) {
                 levels.push_back(args.overview_levels[io]);
@@ -321,6 +320,7 @@ int main(int ac, char *av[]) {
             ("help,h", "print usage")
             ("overview,o", po::value<std::string>()->default_value(""), "overview levels which will be generated for input images")
             ("cog", "convert input Sentinel 2 subdatasets to cloud-optimized GeoTIFFs ")
+            ("cog-dir", po::value<std::string>()->default_value(""), "directory where GeoTIFF files wlil be stored, defaults to the directory of the output VRT file.")
             ("verbose,v", "verbose output")
             ("input-file", po::value<std::string>())
             ("output-file", po::value<std::string>());
@@ -366,6 +366,12 @@ int main(int ac, char *av[]) {
         return 1;
     }
     args.output_file = vm["output-file"].as<std::string>();
+
+
+    args.out_cog_dir = vm["cog-dir"].as<std::string>();
+    if (args.out_cog_dir.empty()) {
+        args.out_cog_dir = fs::path(args.output_file).parent_path().string();
+    }
 
 
     args.overview_levels.clear();

@@ -18,6 +18,7 @@ For fast interactive mapping, tiled GeoTIFF files with overview levels 2, 4, 8, 
                         images
   --cog                 convert input Sentinel 2 subdatasets to cloud-optimized
                         GeoTIFFs 
+  --cog-dir             directory where GeoTIFF files wlil be stored, defaults to the directory of the output VRT file
   -v [ --verbose ]      verbose output
   --input-file arg
   --output-file arg
