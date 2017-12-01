@@ -21,19 +21,9 @@
 
 /*
  *
- * eo_reduce -o /home/marius/Desktop/test_reduce.tif /home/marius/github/eo_webtools/sentinel_webview/data/S2A_MSIL1C_20161213T093402_N0204_R136_T34UFD_20161213T093403.vrt /home/marius/github/eo_webtools/sentinel_webview/data/S2A_MSIL1C_20170411T081601_N0204_R121_T34KGD_20170411T083418.vrt /home/marius/github/eo_webtools/sentinel_webview/data/S2A_MSIL1C_20171002T094031_N0205_R036_T34UFD_20171002T094035.vrt
+ * eo_reduce  --t_size="10980 10980" --t_srs="EPSG:32634" --t_win="600000 709800 5790240 5900040" -f "mean" -o /home/marius/Desktop/test_reduce.tif /home/marius/github/eo_webtools/sentinel_webview/data/S2A_MSIL1C_20161213T093402_N0204_R136_T34UFD_20161213T093403.vrt /home/marius/github/eo_webtools/sentinel_webview/data/S2A_MSIL1C_20171002T094031_N0205_R036_T34UFD_20171002T094035.vrt
  * eo_reduce -f "mean" --t_win="799500 809500 789000 799000" --t_size="334 334" --t_srs="EPSG:32636" -o /home/marius/Desktop/test_reduce_landsat.tif /home/marius/github/eo_webtools/eo_reduce/data/Landsat/
  *
- *
- *
- *  v.left = 799500.000;
-    v.right = 809500.000;
-    v.top = 799000.000;
-    v.bottom = 789000.000;
-    v.width = 334;
-    v.height = 334;
-    v.srs = "EPSG:32636";
-
  *
  */
 
@@ -43,7 +33,6 @@
  * TODO:
  * - add resampling argument
  * - implement band selection
- * - add view argument
  * - add memorylimit argument
  */
 
@@ -322,7 +311,6 @@ int run() {
                           affine_in[3] + affine_in[4] * gdal_in->GetRasterXSize() + affine_in[5] * gdal_in->GetRasterYSize()};
 
 
-
         if( coord_transform == NULL || !coord_transform->Transform( 4, x, y )) {
             std::cout << "ERROR: coordinate transformation failed" << std::endl;
             return 1;
@@ -360,7 +348,7 @@ int run() {
     out_co.AddNameValue("TILED","YES");
     out_co.AddNameValue("BLOCKXSIZE","256");
     out_co.AddNameValue("BLOCKYSIZE","256");
-    out_co.AddNameValue("COMPRESS","DEFLATE");
+    //out_co.AddNameValue("COMPRESS","DEFLATE");
 
 
     GDALDatasetH gdal_out = GDALCreate(gtiff_driver, args.output_path.c_str(), args.sview.width, args.sview.height, n_bands, GDT_Float64, out_co.List());
