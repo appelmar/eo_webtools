@@ -1,0 +1,4 @@
+[submodule "eo_webtile"]
+	path = eo_webtile
+	url = https://github.com/appelmar/eo_webtile
+	branch = master
