@@ -2,3 +2,15 @@
 	path = eo_webtile
 	url = https://github.com/appelmar/eo_webtile
 	branch = master
+[submodule "s2vrt"]
+	path = s2vrt
+	url = https://github.com/appelmar/s2vrt
+	branch = master
+[submodule "eo_webview"]
+	path = eo_webview
+	url = https://github.com/appelmar/eo_webview
+	branch = master
+[submodule "eo_reduce"]
+	path = eo_reduce
+	url = https://github.com/appelmar/eo_reduce
+	branch = master
